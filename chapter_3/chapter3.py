@@ -19,11 +19,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-
 '''
 Introduction
 '''
-
 mnist = fetch_openml('mnist_784', as_frame = False)
 
 X, y = mnist.data, mnist.target
@@ -52,7 +50,6 @@ X_train, X_test, y_train, y_test = X[:train_size], X[train_size:], y[:train_size
 '''
 Training a binary classifier
 '''
-
 # Finding the 5
 y_train_5 = (y_train == '5') 
 y_test_5 = (y_test == '5') 
@@ -83,7 +80,6 @@ plt.show()
 '''
 Performance Performance measures
 '''
-
 # Accuracy with cross validation
 cv_socre_sgd = cross_val_score(sgd_clf, X_train, y_train_5, cv = 3, scoring = "accuracy")
 
@@ -209,7 +205,6 @@ roc_auc_score(y_train_5, y_scores_forest)
 '''
 Multiclass Classification
 '''
-
 # Using SVC for multiclass classification
 svm_clf = SVC(random_state = 42)
 svm_clf.fit(X_train[:2000], y_train[:2000])
@@ -241,7 +236,6 @@ cross_val_score(sgd_clf, X_train_scaled, y_train, cv = 3, scoring = "accuracy")
 '''
 Error Analysis
 '''
-
 # Classification probabilities
 y_train_pred = cross_val_predict(sgd_clf, X_train_scaled, y_train, cv=3)
 ConfusionMatrixDisplay.from_predictions(
@@ -270,7 +264,6 @@ plt.show()
 '''
 Multilabel Classification
 '''
-
 y_train_large = (y_train >= '7')
 y_train_odd = (y_train.astype('int8') % 2 == 1)
 y_multilabel = np.c_[y_train_large, y_train_odd]
@@ -292,7 +285,6 @@ chain_clf.predict([digit])
 '''
 Multioutput Classification
 '''
-
 np.random.seed(42) # to make this code example reproducible
 noise = np.random.randint(0, 100, (len(X_train), 784))
 X_train_mod = X_train + noise
