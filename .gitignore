@@ -4,4 +4,4 @@
 *.pkl
 *.csv
 *.tgz
-__datasets__/
+datasets/
