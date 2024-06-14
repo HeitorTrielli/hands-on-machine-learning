@@ -134,3 +134,107 @@ without using Scikit-Learn, only NumPy. Use it on a classification task such as
 the iris dataset.
 """
 import numpy as np
+from sklearn.datasets import load_iris
+
+
+def scale_inputs(X):
+    # Vectorized form came from the solutions. Before, I did with a for loop
+    mean = X.mean(axis=0)
+    std = X.std(axis=0)
+
+    return (X - mean) / std
+
+
+iris = load_iris(as_frame=True)
+
+iris_data = np.array(iris.data)
+iris_data = scale_inputs(iris_data)
+iris_data = np.c_[np.ones(len(iris_data)), iris_data]
+
+iris_target = np.array(iris.target)
+
+theta_matrix = np.ones((np.unique(iris_target).shape[0], iris_data.shape[1]))
+
+size = len(iris_data)
+
+np.random.seed(42)
+random_indexes = np.random.permutation(size)
+
+iris_data = iris_data[random_indexes]
+iris_target = iris_target[random_indexes]
+
+valid_ratio = 0
+test_ratio = 0.2
+valid_size = int(np.ceil(valid_ratio * size))
+test_size = int(np.ceil(test_ratio * size))
+train_size = size - valid_size - test_size
+
+test_iris_data = iris_data[:test_size]
+test_iris_target = iris_target[:test_size]
+
+valid_iris_data = iris_data[test_size : test_size + valid_size]
+valid_iris_target = iris_target[test_size : test_size + valid_size]
+
+train_iris_data = iris_data[test_size + valid_size :]
+train_iris_target = iris_target[test_size + valid_size :]
+
+
+def softscore(x: np.array, theta_matrix: np.array):
+    return np.dot(theta_matrix, x)
+
+
+def softmax_function(x: np.array, theta_matrix):
+    softscores = softscore(x, theta_matrix)
+    denominator = np.sum([np.exp(value) for value in softscores])
+    return np.array([np.exp(value) / denominator for value in softscores])
+
+
+def inside_sum_cost(x, target, theta_matrix):
+    target_row = np.zeros(3)
+    target_row[target] = 1
+    return -np.dot(np.log(softmax_function(x, theta_matrix)), target_row)
+
+
+def inside_sum_entropy(x, target, theta_matrix):
+    target_row = np.zeros(3)
+    target_row[target] = 1
+    inside_parenthesis = softmax_function(x, theta_matrix) - target_row
+    return np.array([x * value for value in inside_parenthesis])
+
+
+def outside_sum(
+    inner_sum_func,
+    theta_matrix,
+    iris_data=train_iris_data,
+    iris_target=train_iris_target,
+):
+
+    m = len(iris_data)
+    inner_summations = np.array(
+        [
+            inner_sum_func(x, target, theta_matrix)
+            for x, target in zip(np.array(iris_data), iris_target)
+        ]
+    )
+
+    return 1 / m * np.sum(inner_summations, axis=0)
+
+
+step_size = 0.5
+last_cost = np.inf
+for iteration in range(10000):
+    theta_matrix = theta_matrix - step_size * outside_sum(
+        inside_sum_entropy, theta_matrix
+    )
+    new_cost = outside_sum(inside_sum_cost, theta_matrix)
+    if new_cost > last_cost:
+        break
+    last_cost = new_cost.copy()
+    print(iteration + 1, new_cost)
+
+
+test_probs = softmax_function(test_iris_data.T, theta_matrix)
+
+test_predicts = test_probs.argmax(axis=0)
+accuracy = (test_predicts == test_iris_target).mean()
+accuracy  # accuracy = 1 baby lets GOOOOOOOOOOOOOO
