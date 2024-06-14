@@ -220,14 +220,18 @@ def outside_sum(
     return 1 / m * np.sum(inner_summations, axis=0)
 
 
+# My early stopping is not stopping xD
+# I'll put a toleration parameter so that it stops if the
+# errors stop decreasing fastly
 step_size = 0.5
 last_cost = np.inf
+tol = 1e-5
 for iteration in range(10000):
     theta_matrix = theta_matrix - step_size * outside_sum(
         inside_sum_entropy, theta_matrix
     )
     new_cost = outside_sum(inside_sum_cost, theta_matrix)
-    if new_cost > last_cost:
+    if new_cost > last_cost or abs(new_cost - last_cost) < tol:
         break
     last_cost = new_cost.copy()
     print(iteration + 1, new_cost)
