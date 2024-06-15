@@ -163,7 +163,7 @@ random_indexes = np.random.permutation(size)
 iris_data = iris_data[random_indexes]
 iris_target = iris_target[random_indexes]
 
-valid_ratio = 0
+valid_ratio = 0.2
 test_ratio = 0.2
 valid_size = int(np.ceil(valid_ratio * size))
 test_size = int(np.ceil(test_ratio * size))
@@ -225,13 +225,15 @@ def outside_sum(
 # errors stop decreasing fastly
 step_size = 0.5
 last_cost = np.inf
-tol = 1e-5
-for iteration in range(10000):
+# tol = 1e-5
+for iteration in range(1000000):
     theta_matrix = theta_matrix - step_size * outside_sum(
         inside_sum_entropy, theta_matrix
     )
-    new_cost = outside_sum(inside_sum_cost, theta_matrix)
-    if new_cost > last_cost or abs(new_cost - last_cost) < tol:
+    new_cost = outside_sum(
+        inside_sum_cost, theta_matrix, valid_iris_data, valid_iris_target
+    )
+    if new_cost > last_cost:
         break
     last_cost = new_cost.copy()
     print(iteration + 1, new_cost)
