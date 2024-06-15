@@ -226,16 +226,19 @@ def outside_sum(
 step_size = 0.5
 last_cost = np.inf
 # tol = 1e-5
-for iteration in range(1000000):
-    theta_matrix = theta_matrix - step_size * outside_sum(
-        inside_sum_entropy, theta_matrix
+last_theta_matrix = theta_matrix.copy()
+for iteration in range(10000):
+    new_theta_matrix = last_theta_matrix - step_size * outside_sum(
+        inside_sum_entropy, last_theta_matrix
     )
     new_cost = outside_sum(
-        inside_sum_cost, theta_matrix, valid_iris_data, valid_iris_target
+        inside_sum_cost, new_theta_matrix, valid_iris_data, valid_iris_target
     )
     if new_cost > last_cost:
+        theta_matrix = last_theta_matrix
         break
     last_cost = new_cost.copy()
+    last_theta_matrix = new_theta_matrix.copy()
     print(iteration + 1, new_cost)
 
 
