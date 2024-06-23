@@ -31,7 +31,7 @@ preprocessing = ColumnTransformer(
         ("cluster", mypipes.cluster_similarity, ["latitude", "longitude"]),
         (
             "cat",
-            mypipes.cat_pipelinne,
+            mypipes.cat_pipeline,
             housing.dtypes.loc[housing.dtypes == object].index.to_list(),
         ),
     ],
@@ -242,7 +242,7 @@ preprocessing_knn = ColumnTransformer(
         ("knn", knn_transform, ["latitude", "longitude"]),
         (
             "cat",
-            mypipes.cat_pipelinne,
+            mypipes.cat_pipeline,
             housing.dtypes.loc[housing.dtypes == object].index.to_list(),
         ),
     ],

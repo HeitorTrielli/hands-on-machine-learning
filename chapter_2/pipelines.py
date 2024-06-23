@@ -27,7 +27,7 @@ log_pipeline = Pipeline(
     ]
 )
 
-cat_pipelinne = Pipeline(
+cat_pipeline = Pipeline(
     [("impute", SimpleImputer(strategy="most_frequent")), ("encoder", OneHotEncoder())]
 )
 
