@@ -63,7 +63,7 @@ rbf_kernel_svm_clf.fit(X, y)
 """
 SVM Classes and Computational Complexity
 """
-# Codeless chapter
+# Codeless section
 
 """
 SVM Regression
@@ -104,15 +104,15 @@ x = X[0]
 """
 Under the Hood of Linear SVM Classifiers
 """
-# Codeless chapter
+# Codeless section
 
 """
 The Dual Problem
 """
-# Codeless chapter
+# Codeless section
 
 
 """
 Kernelized SVMs
 """
-# Codeless chapter
+# Codeless section
