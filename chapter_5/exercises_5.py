@@ -8,9 +8,9 @@
 # the baseline for prediction. You just preddict the class of a new datapoint as the
 # class of the other datapoints that were on its side of the hyperplane
 
-# PS: it is also important to chose the hyperplane that is as far as possible from
-# each class. This means to maximize the 'street' that separates both classes, to
-# reduce the chances of missclassification when you use the model on new data
+# PS (from the solutions): it is also important to chose the hyperplane that is as far
+# as possible from each class. This means to maximize the 'street' that separates both
+# classes, to reduce the chances of missclassification when you use the model on new data
 
 """
 2. What is a support vector?

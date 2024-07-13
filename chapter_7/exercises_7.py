@@ -31,7 +31,7 @@ forests, or stacking ensembles?
 # just another way of bagging, hence they can be distributed. Stacking ensambles can also be
 # paralelized, since each model is independent from the last one
 
-# PS: for the stacking ensembles, the layers have to be sequential, so you can only keep
+# PS (from the solutions): for the stacking ensembles, the layers have to be sequential, so you can only keep
 # training the model after all the servers end their computation
 
 """
