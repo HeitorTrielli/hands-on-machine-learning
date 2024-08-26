@@ -9,3 +9,5 @@ datasets/
 *.dot
 *.mmap
 *.png
+/my_logs
+/my_fashion_mnist
