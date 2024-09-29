@@ -1,7 +1,11 @@
 import os
 from datetime import datetime
 
+import numpy as np
 import tensorflow as tf
+
+# os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+
 
 """
 1. What is the problem that Glorot initialization and He initialization aim to fix?
@@ -108,7 +112,7 @@ converging faster than before? Does it produce a better model? How does it
 affect training speed?
 d. Try replacing batch normalization with SELU, and make the necessary adjustments to 
 ensure the network self-normalizes (i.e., standardize the input features, use LeCun 
-normal initialization, make sure the DNN contains only asequence of dense layers, etc.).
+normal initialization, make sure the DNN contains only a sequence of dense layers, etc.).
 e. Try regularizing the model with alpha dropout. Then, without retraining your
 model, see if you can achieve better accuracy using MC dropout.
 f. Retrain your model using 1cycle scheduling and see if it improves training
@@ -124,7 +128,7 @@ cifar_test_feats, cifar_test_label = cifar_test
 model = tf.keras.Sequential(
     [
         tf.keras.layers.Input(shape=cifar_train_feats.shape[1:]),
-        tf.keras.layers.Flatten(input_shape=[28, 28]),
+        tf.keras.layers.Flatten(),
         tf.keras.layers.Dense(100, activation="silu", kernel_initializer="he_normal"),
         tf.keras.layers.Dense(100, activation="silu", kernel_initializer="he_normal"),
         tf.keras.layers.Dense(100, activation="silu", kernel_initializer="he_normal"),
@@ -155,11 +159,11 @@ model = tf.keras.Sequential(
 
 def piecewise_constant_fn(epoch):
     if epoch < 5:
-        return 0.01
-    elif epoch < 15:
-        return 0.005
-    else:
         return 0.001
+    elif epoch < 15:
+        return 0.0025
+    else:
+        return 0.0005
 
 
 lr_scheduler = tf.keras.callbacks.LearningRateScheduler(piecewise_constant_fn)
@@ -177,7 +181,7 @@ tensorboard_cb = tf.keras.callbacks.TensorBoard(run_logdir)
 
 model.compile(
     loss="sparse_categorical_crossentropy",
-    optimizer=tf.keras.optimizers.Nadam(),
+    optimizer=tf.keras.optimizers.Nadam(learning_rate=0.001),
     metrics=["accuracy"],
 )
 
@@ -186,11 +190,299 @@ history = model.fit(
     cifar_train_label,
     epochs=30,
     validation_data=(cifar_test_feats, cifar_test_label),
-    callbacks=[lr_scheduler, tensorboard_cb],
+    callbacks=[tensorboard_cb],
 )
 
-import os
 
-log_dir = "my_logs"
-if not os.path.exists(log_dir):
-    os.makedirs(log_dir)
+# c.
+model = tf.keras.Sequential(
+    [
+        tf.keras.layers.Input(shape=cifar_train_feats.shape[1:]),
+        tf.keras.layers.Flatten(),
+        tf.keras.layers.BatchNormalization(),
+        tf.keras.layers.Dense(100, activation="silu", kernel_initializer="he_normal"),
+        tf.keras.layers.BatchNormalization(),
+        tf.keras.layers.Dense(100, activation="silu", kernel_initializer="he_normal"),
+        tf.keras.layers.BatchNormalization(),
+        tf.keras.layers.Dense(100, activation="silu", kernel_initializer="he_normal"),
+        tf.keras.layers.BatchNormalization(),
+        tf.keras.layers.Dense(100, activation="silu", kernel_initializer="he_normal"),
+        tf.keras.layers.BatchNormalization(),
+        tf.keras.layers.Dense(100, activation="silu", kernel_initializer="he_normal"),
+        tf.keras.layers.BatchNormalization(),
+        tf.keras.layers.Dense(100, activation="silu", kernel_initializer="he_normal"),
+        tf.keras.layers.BatchNormalization(),
+        tf.keras.layers.Dense(100, activation="silu", kernel_initializer="he_normal"),
+        tf.keras.layers.BatchNormalization(),
+        tf.keras.layers.Dense(100, activation="silu", kernel_initializer="he_normal"),
+        tf.keras.layers.BatchNormalization(),
+        tf.keras.layers.Dense(100, activation="silu", kernel_initializer="he_normal"),
+        tf.keras.layers.BatchNormalization(),
+        tf.keras.layers.Dense(100, activation="silu", kernel_initializer="he_normal"),
+        tf.keras.layers.BatchNormalization(),
+        tf.keras.layers.Dense(100, activation="silu", kernel_initializer="he_normal"),
+        tf.keras.layers.BatchNormalization(),
+        tf.keras.layers.Dense(100, activation="silu", kernel_initializer="he_normal"),
+        tf.keras.layers.BatchNormalization(),
+        tf.keras.layers.Dense(100, activation="silu", kernel_initializer="he_normal"),
+        tf.keras.layers.BatchNormalization(),
+        tf.keras.layers.Dense(100, activation="silu", kernel_initializer="he_normal"),
+        tf.keras.layers.BatchNormalization(),
+        tf.keras.layers.Dense(100, activation="silu", kernel_initializer="he_normal"),
+        tf.keras.layers.BatchNormalization(),
+        tf.keras.layers.Dense(100, activation="silu", kernel_initializer="he_normal"),
+        tf.keras.layers.BatchNormalization(),
+        tf.keras.layers.Dense(100, activation="silu", kernel_initializer="he_normal"),
+        tf.keras.layers.BatchNormalization(),
+        tf.keras.layers.Dense(100, activation="silu", kernel_initializer="he_normal"),
+        tf.keras.layers.BatchNormalization(),
+        tf.keras.layers.Dense(100, activation="silu", kernel_initializer="he_normal"),
+        tf.keras.layers.BatchNormalization(),
+        tf.keras.layers.Dense(100, activation="silu", kernel_initializer="he_normal"),
+        tf.keras.layers.BatchNormalization(),
+        tf.keras.layers.Dense(10, activation="softmax"),
+    ]
+)
+model.compile(
+    loss="sparse_categorical_crossentropy",
+    optimizer=tf.keras.optimizers.Nadam(learning_rate=0.001),
+    metrics=["accuracy"],
+)
+
+run_logdir = get_run_logdir()
+tensorboard_cb = tf.keras.callbacks.TensorBoard(run_logdir)
+
+history = model.fit(
+    cifar_train_feats,
+    cifar_train_label,
+    epochs=30,
+    validation_data=(cifar_test_feats, cifar_test_label),
+    callbacks=[tensorboard_cb],
+)
+
+# The model got WAY better.
+
+# d.
+# fmt:off
+model = tf.keras.Sequential(
+    [
+        tf.keras.layers.Input(shape=cifar_train_feats.shape[1:]),
+        tf.keras.layers.Flatten(),
+        tf.keras.layers.Normalization(),
+        tf.keras.layers.Dense(100, activation="selu", kernel_initializer="lecun_normal"),
+        tf.keras.layers.Dense(100, activation="selu", kernel_initializer="lecun_normal"),
+        tf.keras.layers.Dense(100, activation="selu", kernel_initializer="lecun_normal"),
+        tf.keras.layers.Dense(100, activation="selu", kernel_initializer="lecun_normal"),
+        tf.keras.layers.Dense(100, activation="selu", kernel_initializer="lecun_normal"),
+        tf.keras.layers.Dense(100, activation="selu", kernel_initializer="lecun_normal"),
+        tf.keras.layers.Dense(100, activation="selu", kernel_initializer="lecun_normal"),
+        tf.keras.layers.Dense(100, activation="selu", kernel_initializer="lecun_normal"),
+        tf.keras.layers.Dense(100, activation="selu", kernel_initializer="lecun_normal"),
+        tf.keras.layers.Dense(100, activation="selu", kernel_initializer="lecun_normal"),
+        tf.keras.layers.Dense(100, activation="selu", kernel_initializer="lecun_normal"),
+        tf.keras.layers.Dense(100, activation="selu", kernel_initializer="lecun_normal"),
+        tf.keras.layers.Dense(100, activation="selu", kernel_initializer="lecun_normal"),
+        tf.keras.layers.Dense(100, activation="selu", kernel_initializer="lecun_normal"),
+        tf.keras.layers.Dense(100, activation="selu", kernel_initializer="lecun_normal"),
+        tf.keras.layers.Dense(100, activation="selu", kernel_initializer="lecun_normal"),
+        tf.keras.layers.Dense(100, activation="selu", kernel_initializer="lecun_normal"),
+        tf.keras.layers.Dense(100, activation="selu", kernel_initializer="lecun_normal"),
+        tf.keras.layers.Dense(100, activation="selu", kernel_initializer="lecun_normal"),
+        tf.keras.layers.Dense(100, activation="selu", kernel_initializer="lecun_normal"),
+        tf.keras.layers.Dense(10, activation="softmax"),
+    ]
+)
+# fmt:on
+model.compile(
+    loss="sparse_categorical_crossentropy",
+    optimizer=tf.keras.optimizers.Nadam(learning_rate=0.001),
+    metrics=["accuracy"],
+)
+
+run_logdir = get_run_logdir()
+tensorboard_cb = tf.keras.callbacks.TensorBoard(run_logdir)
+
+history = model.fit(
+    cifar_train_feats,
+    cifar_train_label,
+    epochs=30,
+    validation_data=(cifar_test_feats, cifar_test_label),
+    callbacks=[tensorboard_cb],
+)
+
+# not that great
+
+# e.
+# fmt:off
+model = tf.keras.Sequential(
+    [
+        tf.keras.layers.Input(shape=cifar_train_feats.shape[1:]),
+        tf.keras.layers.Flatten(),
+        tf.keras.layers.Normalization(),
+        tf.keras.layers.Dense(100, activation="selu", kernel_initializer="lecun_normal"),
+        tf.keras.layers.Dense(100, activation="selu", kernel_initializer="lecun_normal"),
+        tf.keras.layers.Dense(100, activation="selu", kernel_initializer="lecun_normal"),
+        tf.keras.layers.Dense(100, activation="selu", kernel_initializer="lecun_normal"),
+        tf.keras.layers.Dense(100, activation="selu", kernel_initializer="lecun_normal"),
+        tf.keras.layers.Dense(100, activation="selu", kernel_initializer="lecun_normal"),
+        tf.keras.layers.Dense(100, activation="selu", kernel_initializer="lecun_normal"),
+        tf.keras.layers.Dense(100, activation="selu", kernel_initializer="lecun_normal"),
+        tf.keras.layers.Dense(100, activation="selu", kernel_initializer="lecun_normal"),
+        tf.keras.layers.Dense(100, activation="selu", kernel_initializer="lecun_normal"),
+        tf.keras.layers.Dense(100, activation="selu", kernel_initializer="lecun_normal"),
+        tf.keras.layers.Dense(100, activation="selu", kernel_initializer="lecun_normal"),
+        tf.keras.layers.Dense(100, activation="selu", kernel_initializer="lecun_normal"),
+        tf.keras.layers.Dense(100, activation="selu", kernel_initializer="lecun_normal"),
+        tf.keras.layers.Dense(100, activation="selu", kernel_initializer="lecun_normal"),
+        tf.keras.layers.Dense(100, activation="selu", kernel_initializer="lecun_normal"),
+        tf.keras.layers.Dense(100, activation="selu", kernel_initializer="lecun_normal"),
+        tf.keras.layers.Dense(100, activation="selu", kernel_initializer="lecun_normal"),
+        tf.keras.layers.Dense(100, activation="selu", kernel_initializer="lecun_normal"),
+        tf.keras.layers.Dense(100, activation="selu", kernel_initializer="lecun_normal"),
+        tf.keras.layers.AlphaDropout(0.2),
+        tf.keras.layers.Dense(10, activation="softmax"),
+    ]
+)
+# fmt:on
+model.compile(
+    loss="sparse_categorical_crossentropy",
+    optimizer=tf.keras.optimizers.Nadam(learning_rate=0.001),
+    metrics=["accuracy"],
+)
+
+
+run_logdir = get_run_logdir()
+tensorboard_cb = tf.keras.callbacks.TensorBoard(run_logdir)
+
+
+history = model.fit(
+    cifar_train_feats,
+    cifar_train_label,
+    epochs=30,
+    validation_data=(cifar_test_feats, cifar_test_label),
+    callbacks=[tensorboard_cb],
+)
+
+# MC Dropout
+y_probas = np.stack([model(cifar_test_feats, training=True) for sample in range(100)])
+y_proba = y_probas.mean(axis=0)
+
+predicts = [y_proba[i].argmax() for i in range(len(y_proba))]
+
+labels = [x[0] for x in cifar_test_label]
+
+
+accuraccy = np.mean(
+    [abs(1 if predicts[i] - labels[i] == 0 else 0) for i in range(len(y_proba))]
+)
+print(accuraccy)
+
+
+# f.
+import os
+from datetime import datetime
+
+import numpy as np
+import tensorflow as tf
+
+cifar_train, cifar_test = tf.keras.datasets.cifar10.load_data()
+
+cifar_train_feats, cifar_train_label = cifar_train
+cifar_test_feats, cifar_test_label = cifar_test
+
+
+class OneCycleLR(tf.keras.callbacks.Callback):
+    def __init__(self, max_lr, total_steps):
+        super(OneCycleLR, self).__init__()
+        self.max_lr = max_lr
+        self.total_steps = total_steps
+        self.step = 0
+
+    def get_lr(self):
+        halfway = self.total_steps // 2
+        if self.step <= halfway:
+            # First half, increase learning rate
+            return self.max_lr * (self.step / halfway)
+        else:
+            # Second half, decrease learning rate
+            return self.max_lr * (1 - (self.step - halfway) / halfway)
+
+    def on_train_batch_begin(self, batch, logs=None):
+        learning_rate = self.get_lr()
+        self.model.optimizer.learning_rate = learning_rate
+        self.step += 1
+
+
+model = tf.keras.Sequential(
+    [
+        tf.keras.layers.Input(shape=cifar_train_feats.shape[1:]),
+        tf.keras.layers.Flatten(),
+        tf.keras.layers.BatchNormalization(),
+        tf.keras.layers.Dense(100, activation="silu", kernel_initializer="he_normal"),
+        tf.keras.layers.BatchNormalization(),
+        tf.keras.layers.Dense(100, activation="silu", kernel_initializer="he_normal"),
+        tf.keras.layers.BatchNormalization(),
+        tf.keras.layers.Dense(100, activation="silu", kernel_initializer="he_normal"),
+        tf.keras.layers.BatchNormalization(),
+        tf.keras.layers.Dense(100, activation="silu", kernel_initializer="he_normal"),
+        tf.keras.layers.BatchNormalization(),
+        tf.keras.layers.Dense(100, activation="silu", kernel_initializer="he_normal"),
+        tf.keras.layers.BatchNormalization(),
+        tf.keras.layers.Dense(100, activation="silu", kernel_initializer="he_normal"),
+        tf.keras.layers.BatchNormalization(),
+        tf.keras.layers.Dense(100, activation="silu", kernel_initializer="he_normal"),
+        tf.keras.layers.BatchNormalization(),
+        tf.keras.layers.Dense(100, activation="silu", kernel_initializer="he_normal"),
+        tf.keras.layers.BatchNormalization(),
+        tf.keras.layers.Dense(100, activation="silu", kernel_initializer="he_normal"),
+        tf.keras.layers.BatchNormalization(),
+        tf.keras.layers.Dense(100, activation="silu", kernel_initializer="he_normal"),
+        tf.keras.layers.BatchNormalization(),
+        tf.keras.layers.Dense(100, activation="silu", kernel_initializer="he_normal"),
+        tf.keras.layers.BatchNormalization(),
+        tf.keras.layers.Dense(100, activation="silu", kernel_initializer="he_normal"),
+        tf.keras.layers.BatchNormalization(),
+        tf.keras.layers.Dense(100, activation="silu", kernel_initializer="he_normal"),
+        tf.keras.layers.BatchNormalization(),
+        tf.keras.layers.Dense(100, activation="silu", kernel_initializer="he_normal"),
+        tf.keras.layers.BatchNormalization(),
+        tf.keras.layers.Dense(100, activation="silu", kernel_initializer="he_normal"),
+        tf.keras.layers.BatchNormalization(),
+        tf.keras.layers.Dense(100, activation="silu", kernel_initializer="he_normal"),
+        tf.keras.layers.BatchNormalization(),
+        tf.keras.layers.Dense(100, activation="silu", kernel_initializer="he_normal"),
+        tf.keras.layers.BatchNormalization(),
+        tf.keras.layers.Dense(100, activation="silu", kernel_initializer="he_normal"),
+        tf.keras.layers.BatchNormalization(),
+        tf.keras.layers.Dense(100, activation="silu", kernel_initializer="he_normal"),
+        tf.keras.layers.BatchNormalization(),
+        tf.keras.layers.Dense(100, activation="silu", kernel_initializer="he_normal"),
+        tf.keras.layers.BatchNormalization(),
+        tf.keras.layers.Dense(10, activation="softmax"),
+    ]
+)
+model.compile(
+    loss="sparse_categorical_crossentropy",
+    optimizer=tf.keras.optimizers.Nadam(learning_rate=0.001),
+    metrics=["accuracy"],
+)
+
+
+def get_run_logdir(base_path="my_logs"):
+    return os.path.join(
+        base_path, datetime.strftime(datetime.now(), format="%Y-%m-%d %H:%M:%S")
+    )
+
+
+run_logdir = get_run_logdir()
+tensorboard_cb = tf.keras.callbacks.TensorBoard(run_logdir)
+
+onecycle_cb = OneCycleLR(max_lr=0.01, total_steps=30 * 1563)
+
+history = model.fit(
+    cifar_train_feats,
+    cifar_train_label,
+    epochs=30,
+    validation_data=(cifar_test_feats, cifar_test_label),
+    callbacks=[tensorboard_cb, onecycle_cb],
+)
